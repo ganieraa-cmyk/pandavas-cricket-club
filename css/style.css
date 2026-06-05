@@ -1,0 +1,20 @@
+body{
+  background:#07153a;
+  color:#d4af37;
+  font-family:Arial,sans-serif;
+  text-align:center;
+}
+
+.header{
+  padding:30px;
+}
+
+button{
+  background:#d4af37;
+  color:#07153a;
+  border:none;
+  padding:12px 20px;
+  margin:8px;
+  border-radius:10px;
+  font-weight:bold;
+}
