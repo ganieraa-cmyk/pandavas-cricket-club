@@ -19,6 +19,12 @@
   </div>
 
   <script src="js/app.js"></script>
-  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/firebase.js">
+    import { db, auth } from "./firebase.js";
+
+console.log("Pandavas Cricket Club Loaded");
+console.log(db);
+console.log(auth);
+  </script>
 </body>
 </html>
