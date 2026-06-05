@@ -8,7 +8,7 @@ import {
 
 let matchId = null;
 document.getElementById("startMatch").addEventListener("click", async () => {
-
+console.log("START MATCH CLICKED");
   const teamA = document.getElementById("teamA").value;
   const teamB = document.getElementById("teamB").value;
 
@@ -57,6 +57,8 @@ window.addWicket = function() {
   wickets++;
   balls++;
   updateScore();
+  saveMatch();
+
 }
 
 updateScore();
