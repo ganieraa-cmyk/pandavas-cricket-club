@@ -43,14 +43,14 @@ document.getElementById("startMatch").addEventListener("click", async () => {
 // Update Scoreboard
 function updateScore() {
 
-  document.getElementById("score").innerText =
-    `${runs}/${wickets}`;
+ document.getElementById("score").innerText =
+runs + "/" + wickets;
 
   const overs = Math.floor(balls / 6);
   const remBalls = balls % 6;
 
   document.getElementById("overs").innerText =
-    `${overs}.${remBalls} Overs`;
+overs + "." + remBalls + " Overs";
 }
 
 // Save Match to Firestore
