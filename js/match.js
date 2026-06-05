@@ -1,4 +1,3 @@
-
 import { db } from "./firebase.js";
 import {
   collection,
@@ -143,4 +142,3 @@ window.undoLast = function() {
 }
 
 updateScore();
-```
