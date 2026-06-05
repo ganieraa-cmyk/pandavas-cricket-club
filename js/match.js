@@ -1,6 +1,6 @@
 alert("MATCH JS LOADED");
 console.log("MATCH JS LOADED");
-
+let history = [];
 import { db } from "./firebase.js";
 import {
 collection,
@@ -60,17 +60,66 @@ balls
 }
 
 window.addRun = function(run) {
-runs += run;
+ history.push({
+    runs,
+    wickets,
+    balls
+  });
+  runs += run;
 balls++;
 updateScore();
 saveMatch();
 }
 
 window.addWicket = function() {
-wickets++;
+history.push({
+  runs,
+  wickets,
+  balls
+});
+  wickets++;
 balls++;
 updateScore();
 saveMatch();
+}
+window.addWide = function() {
+
+  history.push({
+    runs,
+    wickets,
+    balls
+  });
+
+  runs += 1;
+
+  updateScore();
+  saveMatch();
+}
+window.addNoBall = function() {
+
+  history.push({
+    runs,
+    wickets,
+    balls
+  });
+
+  runs += 1;
+
+  updateScore();
+  saveMatch();
+}
+window.undoLast = function() {
+
+  if (history.length === 0) return;
+
+  const last = history.pop();
+
+  runs = last.runs;
+  wickets = last.wickets;
+  balls = last.balls;
+
+  updateScore();
+  saveMatch();
 }
 
 updateScore();
