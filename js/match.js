@@ -143,4 +143,3 @@ window.undoLast = function() {
 }
 
 updateScore();
-```
