@@ -1,3 +1,12 @@
+import { db } from "./firebase.js";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+let matchId = null;
 let runs = 0;
 let wickets = 0;
 let balls = 0;
