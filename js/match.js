@@ -5,7 +5,7 @@ import {
   updateDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
+alert("MATCH VERSION 200");
 console.log("MATCH JS LOADED");
 
 let history = [];
