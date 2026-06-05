@@ -1,3 +1,4 @@
+alert("MATCH JS LOADED");
 import { db } from "./firebase.js";
 import {
   collection,
