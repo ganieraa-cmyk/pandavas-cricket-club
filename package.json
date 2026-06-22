@@ -1,0 +1,21 @@
+{
+  "name": "pandavas-cricket-club",
+  "version": "3.1.0",
+  "description": "🏏 Complete Cricket Scoring PWA for Pandavas Cricket Club",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "firebase serve",
+    "build": "echo 'No build step needed'",
+    "deploy": "firebase deploy --only hosting",
+    "deploy:all": "firebase deploy"
+  },
+  "keywords": ["cricket", "scoring", "pwa", "firebase", "tournament"],
+  "author": "Pandavas Cricket Club",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^10.7.1"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.0.0"
+  }
+}
