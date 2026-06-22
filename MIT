@@ -1,0 +1,43 @@
+
+---
+
+## 📄 **firestore.rules**
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Collection-specific rules (NO wildcard)
+    match /players/{playerId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /teams/{teamId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /matches/{matchId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+      allow create: if request.auth != null && 
+        request.resource.data.team1 != null &&
+        request.resource.data.team2 != null &&
+        request.resource.data.team1 != request.resource.data.team2;
+    }
+    
+    match /tournaments/{tournamentId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /live_scoring/{sessionId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /admin/{document=**} {
+      allow read, write: if request.auth != null && request.auth.token.admin == true;
+    }
+  }
+}
