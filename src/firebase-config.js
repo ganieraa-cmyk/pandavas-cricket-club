@@ -2,8 +2,28 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+// src/firebase-config.js - Add storage functions
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
+export const storage = getStorage(app);
+
+export const uploadFile = async (path, file) => {
+  const storageRef = ref(storage, path);
+  const snapshot = await uploadBytes(storageRef, file);
+  return await getDownloadURL(snapshot.ref);
+};
+
+// Also add to firestore export
+export const firestore = {
+  // ... existing methods
+  
+  // Upload file to storage
+  async uploadFile(path, file) {
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
+  }
+};
 // 🔥 REPLACE WITH YOUR FIREBASE CONFIG
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -15,6 +35,7 @@ const firebaseConfig = {
   appId: "1:531872663001:web:28459979ad5110c8e0c5c8",
   measurementId: "G-EE3XDFJBYY"
 };
+
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
