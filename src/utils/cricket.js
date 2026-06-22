@@ -1,4 +1,4 @@
-// src/utils/cricket.js - Complete Cricket Engine
+// src/utils/cricket.js - COMPLETE CRICKET RULES
 export class CricketEngine {
   constructor() {
     this.matchType = 't20';
@@ -19,7 +19,13 @@ export class CricketEngine {
     this.balls = 0;
     this.ballsInOver = 0;
     this.overs = 0;
-    this.extras = { wide: 0, noBall: 0, bye: 0, legBye: 0 };
+    this.extras = { 
+      wide: 0, 
+      noBall: 0, 
+      bye: 0, 
+      legBye: 0,
+      penalty: 0
+    };
     this.fours = 0;
     this.sixes = 0;
     this.partnership = { runs: 0, balls: 0, wickets: 0 };
@@ -31,10 +37,11 @@ export class CricketEngine {
     this.currentOverWickets = 0;
     this._onOverComplete = null;
     this.currentBatsmen = [];
-    this.battingStats = [];
-    this.bowlingStats = [];
     this.freeHit = false;
     this.powerplayData = { overs: 0, runs: 0, wickets: 0 };
+    this.wideByeRuns = 0; // Wide + Byes (runs scored off wide)
+    this.noBallByeRuns = 0; // No Ball + Byes
+    this.currentBowlerData = null;
   }
 
   setMatchType(type, overs) {
@@ -62,6 +69,7 @@ export class CricketEngine {
     return this;
   }
 
+  // ✅ NORMAL RUNS (0-6)
   addRuns(runs, type = 'normal', shotZone = 'mid') {
     this.runs += runs;
     this.balls++;
@@ -106,10 +114,8 @@ export class CricketEngine {
       freeHit: this.freeHit
     });
     
-    // Reset free hit after legal delivery
     this.freeHit = false;
     
-    // Check target
     if (this.target && this.runs >= this.target) {
       this.isComplete = true;
     }
@@ -117,11 +123,16 @@ export class CricketEngine {
     return this;
   }
 
+  // ✅ WIDE BALL - Complete Rules
   addWide(extraRuns = 0) {
+    // Wide ball: 1 run + any runs scored off the wide
     const totalRuns = 1 + extraRuns;
     this.runs += totalRuns;
     this.extras.wide += totalRuns;
-    // Wide is NOT a legal ball, no ball count increment
+    this.wideByeRuns = extraRuns;
+    
+    // Wide is NOT a legal ball - no ball count increment
+    // But batsman faces it, so we track it
     
     this.ballByBall.push({ 
       runs: totalRuns, 
@@ -129,16 +140,41 @@ export class CricketEngine {
       ball: this.balls + 1,
       over: this.overs,
       isLegal: false,
-      extraRuns,
+      extraRuns: extraRuns,
+      wideBye: extraRuns > 0,
       freeHit: false
     });
     return this;
   }
 
+  // ✅ WIDE + BYES (Runs scored off wide that go to extras)
+  addWideBye(runs = 1) {
+    // Wide ball + runs scored (all counted as wides)
+    const totalRuns = 1 + runs;
+    this.runs += totalRuns;
+    this.extras.wide += totalRuns;
+    this.wideByeRuns = runs;
+    
+    this.ballByBall.push({ 
+      runs: totalRuns, 
+      type: 'wide-bye',
+      ball: this.balls + 1,
+      over: this.overs,
+      isLegal: false,
+      extraRuns: runs,
+      wideBye: true,
+      freeHit: false
+    });
+    return this;
+  }
+
+  // ✅ NO BALL - Complete Rules
   addNoBall(extraRuns = 0) {
+    // No ball: 1 run + any runs scored off the no ball
     const totalRuns = 1 + extraRuns;
     this.runs += totalRuns;
     this.extras.noBall += totalRuns;
+    this.noBallByeRuns = extraRuns;
     
     // Set free hit for next ball
     this.freeHit = true;
@@ -150,12 +186,35 @@ export class CricketEngine {
       ball: this.balls + 1,
       over: this.overs,
       isLegal: false,
-      extraRuns,
+      extraRuns: extraRuns,
       freeHit: true
     });
     return this;
   }
 
+  // ✅ NO BALL + BYES (Runs scored off no ball)
+  addNoBallBye(runs = 1) {
+    const totalRuns = 1 + runs;
+    this.runs += totalRuns;
+    this.extras.noBall += totalRuns;
+    this.noBallByeRuns = runs;
+    
+    this.freeHit = true;
+    this.freeHitBowler = this.currentBowler?.id || null;
+    
+    this.ballByBall.push({ 
+      runs: totalRuns, 
+      type: 'no-ball-bye',
+      ball: this.balls + 1,
+      over: this.overs,
+      isLegal: false,
+      extraRuns: runs,
+      freeHit: true
+    });
+    return this;
+  }
+
+  // ✅ BYE (Runs scored without touching bat)
   addBye(runs = 1) {
     this.runs += runs;
     this.extras.bye += runs;
@@ -190,6 +249,7 @@ export class CricketEngine {
     return this;
   }
 
+  // ✅ LEG BYE (Runs scored off body)
   addLegBye(runs = 1) {
     this.runs += runs;
     this.extras.legBye += runs;
@@ -224,6 +284,7 @@ export class CricketEngine {
     return this;
   }
 
+  // ✅ WICKET - Complete Rules
   addWicket(type = 'bowled', batsmanName = 'Unknown') {
     // Free hit protection - can't get out on free hit (except run out)
     if (this.freeHit && (type === 'bowled' || type === 'caught' || type === 'lbw' || type === 'stumped')) {
@@ -278,7 +339,6 @@ export class CricketEngine {
     
     this.freeHit = false;
     
-    // Check all out
     if (this.wickets >= 10) {
       this.isComplete = true;
     }
@@ -286,6 +346,7 @@ export class CricketEngine {
     return this;
   }
 
+  // ✅ RUN OUT
   addRunOut(batsmanName = 'Unknown', isStriker = true) {
     // Run out can happen on free hit
     this.wickets++;
@@ -335,11 +396,10 @@ export class CricketEngine {
     return this;
   }
 
+  // ✅ RETIRED OUT
   addRetiredOut(batsmanName = 'Unknown') {
     this.wickets++;
     this.partnership.wickets++;
-    // Retired out is NOT a legal delivery
-    // Ball count stays same
     
     this.fallOfWickets.push({
       batsman: batsmanName,
@@ -362,6 +422,22 @@ export class CricketEngine {
       this.isComplete = true;
     }
     
+    return this;
+  }
+
+  // ✅ PENALTY RUNS
+  addPenalty(runs = 5) {
+    this.runs += runs;
+    this.extras.penalty += runs;
+    
+    this.ballByBall.push({ 
+      runs: runs, 
+      type: 'penalty',
+      ball: this.balls + 1,
+      over: this.overs,
+      isLegal: false,
+      penalty: true
+    });
     return this;
   }
 
@@ -408,64 +484,5 @@ export class CricketEngine {
   onOverComplete(callback) {
     this._onOverComplete = callback;
     return this;
-  }
-}
-
-// Stats Calculator
-export class StatsCalculator {
-  static calculateBattingStats(innings) {
-    const totalRuns = innings.reduce((sum, i) => sum + i.runs, 0);
-    const totalBalls = innings.reduce((sum, i) => sum + i.balls, 0);
-    const dismissals = innings.filter(i => i.out).length;
-    const fours = innings.reduce((sum, i) => sum + i.fours, 0);
-    const sixes = innings.reduce((sum, i) => sum + i.sixes, 0);
-    const notOuts = innings.filter(i => !i.out).length;
-    
-    return {
-      runs: totalRuns,
-      balls: totalBalls,
-      fours, sixes,
-      dismissals,
-      notOuts,
-      average: dismissals > 0 ? (totalRuns / dismissals).toFixed(2) : totalRuns.toString(),
-      strikeRate: totalBalls > 0 ? ((totalRuns / totalBalls) * 100).toFixed(2) : '0.00',
-      highestScore: Math.max(...innings.map(i => i.runs), 0),
-      fifties: innings.filter(i => i.runs >= 50 && i.runs < 100).length,
-      hundreds: innings.filter(i => i.runs >= 100).length,
-      ducks: innings.filter(i => i.runs === 0 && i.out).length
-    };
-  }
-
-  static calculateBowlingStats(innings) {
-    const totalWickets = innings.reduce((sum, i) => sum + i.wickets, 0);
-    const totalRuns = innings.reduce((sum, i) => sum + i.runsConceded, 0);
-    const totalOvers = innings.reduce((sum, i) => sum + i.overs, 0);
-    const maidens = innings.reduce((sum, i) => sum + i.maidens, 0);
-    
-    return {
-      wickets: totalWickets,
-      runs: totalRuns,
-      overs: totalOvers,
-      maidens,
-      economy: totalOvers > 0 ? (totalRuns / totalOvers).toFixed(2) : '0.00',
-      average: totalWickets > 0 ? (totalRuns / totalWickets).toFixed(2) : '0.00',
-      strikeRate: totalWickets > 0 ? ((totalOvers * 6) / totalWickets).toFixed(2) : '0.00'
-    };
-  }
-
-  static getOrangeCap(batters) {
-    return batters.sort((a, b) => b.runs - a.runs)[0] || null;
-  }
-
-  static getPurpleCap(bowlers) {
-    return bowlers.sort((a, b) => b.wickets - a.wickets)[0] || null;
-  }
-
-  static getMVP(players) {
-    return players.sort((a, b) => {
-      const scoreA = (a.batting?.runs || 0) + (a.bowling?.wickets || 0) * 20 + (a.fielding?.catches || 0) * 10;
-      const scoreB = (b.batting?.runs || 0) + (b.bowling?.wickets || 0) * 20 + (b.fielding?.catches || 0) * 10;
-      return scoreB - scoreA;
-    })[0] || null;
   }
 }
