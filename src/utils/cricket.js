@@ -485,4 +485,63 @@ export class CricketEngine {
     this._onOverComplete = callback;
     return this;
   }
+  }
+// ✅ ADD THIS AT THE END OF THE FILE
+export class StatsCalculator {
+  static calculateBattingStats(innings) {
+    const totalRuns = innings.reduce((sum, i) => sum + (i.runs || 0), 0);
+    const totalBalls = innings.reduce((sum, i) => sum + (i.balls || 0), 0);
+    const dismissals = innings.filter(i => i.out).length;
+    const fours = innings.reduce((sum, i) => sum + (i.fours || 0), 0);
+    const sixes = innings.reduce((sum, i) => sum + (i.sixes || 0), 0);
+    const notOuts = innings.filter(i => !i.out).length;
+    
+    return {
+      runs: totalRuns,
+      balls: totalBalls,
+      fours, sixes,
+      dismissals,
+      notOuts,
+      average: dismissals > 0 ? (totalRuns / dismissals).toFixed(2) : totalRuns.toString(),
+      strikeRate: totalBalls > 0 ? ((totalRuns / totalBalls) * 100).toFixed(2) : '0.00',
+      highestScore: Math.max(...innings.map(i => i.runs || 0), 0),
+      fifties: innings.filter(i => (i.runs || 0) >= 50 && (i.runs || 0) < 100).length,
+      hundreds: innings.filter(i => (i.runs || 0) >= 100).length,
+      ducks: innings.filter(i => (i.runs || 0) === 0 && i.out).length
+    };
+  }
+
+  static calculateBowlingStats(innings) {
+    const totalWickets = innings.reduce((sum, i) => sum + (i.wickets || 0), 0);
+    const totalRuns = innings.reduce((sum, i) => sum + (i.runsConceded || 0), 0);
+    const totalOvers = innings.reduce((sum, i) => sum + (i.overs || 0), 0);
+    const maidens = innings.reduce((sum, i) => sum + (i.maidens || 0), 0);
+    
+    return {
+      wickets: totalWickets,
+      runs: totalRuns,
+      overs: totalOvers,
+      maidens,
+      economy: totalOvers > 0 ? (totalRuns / totalOvers).toFixed(2) : '0.00',
+      average: totalWickets > 0 ? (totalRuns / totalWickets).toFixed(2) : '0.00',
+      strikeRate: totalWickets > 0 ? ((totalOvers * 6) / totalWickets).toFixed(2) : '0.00'
+    };
+  }
+
+  static getOrangeCap(batters) {
+    return batters.sort((a, b) => (b.runs || 0) - (a.runs || 0))[0] || null;
+  }
+
+  static getPurpleCap(bowlers) {
+    return bowlers.sort((a, b) => (b.wickets || 0) - (a.wickets || 0))[0] || null;
+  }
+
+  static getMVP(players) {
+    return players.sort((a, b) => {
+      const scoreA = (a.batting?.runs || 0) + (a.bowling?.wickets || 0) * 20 + (a.fielding?.catches || 0) * 10;
+      const scoreB = (b.batting?.runs || 0) + (b.bowling?.wickets || 0) * 20 + (b.fielding?.catches || 0) * 10;
+      return scoreB - scoreA;
+    })[0] || null;
+  }
 }
+
