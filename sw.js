@@ -1,24 +1,27 @@
+// sw.js - Updated with working cache
 const CACHE_NAME = 'pandavas-v3.1.0';
+
+// ✅ Only cache files that actually exist
 const urlsToCache = [
-  '/', 'index.html', 'manifest.json',
-  'src/app.js', '/src/firebase-config.js', '/src/styles/main.css',
-  'src/pages/dashboard.js', '/src/pages/teams.js', '/src/pages/players.js',
-  'src/pages/live-scoring.js', '/src/pages/tournament.js', '/src/pages/match-center.js',
-  'src/pages/scorecard.js', '/src/pages/statistics.js', '/src/pages/leaderboards.js',
-  'src/pages/match-report.js', '/src/pages/team-detail.js',
-  'src/components/header.js', '/src/components/sidebar.js', '/src/components/modal.js',
-  'src/components/playing-xi.js', '/src/components/charts.js',
-  'src/utils/cricket.js', '/src/utils/undo-manager.js', '/src/utils/match-result.js',
-  'src/utils/tournament-utils.js', '/src/utils/nrr-calculator.js',
-  'src/utils/realtime-sync.js', '/src/utils/backup.js', '/src/utils/share.js',
-  'src/utils/firestore-helpers.js', '/src/utils/pdf-generator.js',
-  'icons/icon-192.png', '/icons/icon-512.png'
+  './',
+  'index.html',
+  'manifest.json',
+  'src/styles/main.css',
+  'icons/icon-192.png',
+  'icons/icon-512.png'
+  // ✅ REMOVED all JS files - they will be cached dynamically
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+      .then(cache => {
+        console.log('[SW] Caching app shell');
+        return cache.addAll(urlsToCache).catch(err => {
+          console.warn('[SW] Some files failed to cache:', err);
+          // Continue even if some files fail
+        });
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -48,9 +51,8 @@ self.addEventListener('fetch', event => {
           }
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then(cache => {
-            if (!event.request.url.includes('firebase') && 
-                !event.request.url.includes('googleapis') &&
-                !event.request.url.includes('gstatic')) {
+            // Only cache successful responses
+            if (response.status === 200) {
               cache.put(event.request, responseToCache);
             }
           });
@@ -59,7 +61,7 @@ self.addEventListener('fetch', event => {
       })
       .catch(() => {
         if (event.request.headers.get('accept').includes('text/html')) {
-          return caches.match('/index.html');
+          return caches.match('index.html');
         }
         return new Response('Offline - Please check your connection', {
           status: 503,
