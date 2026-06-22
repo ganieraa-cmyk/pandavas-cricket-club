@@ -1,10 +1,10 @@
-// src/firebase-config.js - WITH YOUR FIREBASE CONFIG
+// src/firebase-config.js - COMPLETE FIX
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
-// ✅ YOUR FIREBASE CONFIG
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBbyUmKvhpFf0ZYBlfdH7X1EWDfOH3PDgk",
   authDomain: "pandavas-cc-scorer.firebaseapp.com",
@@ -18,18 +18,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// ✅ Export Firebase services (EACH ONCE)
+// ✅ EACH DECLARED EXACTLY ONCE
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const provider = new GoogleAuthProvider();
-
-// ✅ Upload helper function
-export async function uploadFile(path, file) {
-  const storageRef = ref(storage, path);
-  const snapshot = await uploadBytes(storageRef, file);
-  return await getDownloadURL(snapshot.ref);
-}
 
 // Firestore Helpers
 export const firestore = {
