@@ -1,18 +1,18 @@
 const CACHE_NAME = 'pandavas-v3.1.0';
 const urlsToCache = [
-  '/', '/index.html', '/manifest.json',
-  '/src/app.js', '/src/firebase-config.js', '/src/styles/main.css',
-  '/src/pages/dashboard.js', '/src/pages/teams.js', '/src/pages/players.js',
-  '/src/pages/live-scoring.js', '/src/pages/tournament.js', '/src/pages/match-center.js',
-  '/src/pages/scorecard.js', '/src/pages/statistics.js', '/src/pages/leaderboards.js',
-  '/src/pages/match-report.js', '/src/pages/team-detail.js',
-  '/src/components/header.js', '/src/components/sidebar.js', '/src/components/modal.js',
-  '/src/components/playing-xi.js', '/src/components/charts.js',
-  '/src/utils/cricket.js', '/src/utils/undo-manager.js', '/src/utils/match-result.js',
-  '/src/utils/tournament-utils.js', '/src/utils/nrr-calculator.js',
-  '/src/utils/realtime-sync.js', '/src/utils/backup.js', '/src/utils/share.js',
-  '/src/utils/firestore-helpers.js', '/src/utils/pdf-generator.js',
-  '/icons/icon-192.png', '/icons/icon-512.png'
+  '/', 'index.html', 'manifest.json',
+  'src/app.js', '/src/firebase-config.js', '/src/styles/main.css',
+  'src/pages/dashboard.js', '/src/pages/teams.js', '/src/pages/players.js',
+  'src/pages/live-scoring.js', '/src/pages/tournament.js', '/src/pages/match-center.js',
+  'src/pages/scorecard.js', '/src/pages/statistics.js', '/src/pages/leaderboards.js',
+  'src/pages/match-report.js', '/src/pages/team-detail.js',
+  'src/components/header.js', '/src/components/sidebar.js', '/src/components/modal.js',
+  'src/components/playing-xi.js', '/src/components/charts.js',
+  'src/utils/cricket.js', '/src/utils/undo-manager.js', '/src/utils/match-result.js',
+  'src/utils/tournament-utils.js', '/src/utils/nrr-calculator.js',
+  'src/utils/realtime-sync.js', '/src/utils/backup.js', '/src/utils/share.js',
+  'src/utils/firestore-helpers.js', '/src/utils/pdf-generator.js',
+  'icons/icon-192.png', '/icons/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
