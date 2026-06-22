@@ -1,10 +1,8 @@
-// src/firebase-config.js - COMPLETE FIX
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBbyUmKvhpFf0ZYBlfdH7X1EWDfOH3PDgk",
   authDomain: "pandavas-cc-scorer.firebaseapp.com",
@@ -15,16 +13,15 @@ const firebaseConfig = {
   measurementId: "G-EE3XDFJBYY"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// ✅ EACH DECLARED EXACTLY ONCE
+// ✅ ONLY ONE DECLARATION FOR EACH
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const storage = getStorage(app);  // ← ONLY ONE TIME!
 export const provider = new GoogleAuthProvider();
 
-// Firestore Helpers
+// Firestore helpers
 export const firestore = {
   async create(collectionName, data) {
     const docRef = doc(collection(db, collectionName));
@@ -95,7 +92,7 @@ export const firestore = {
   }
 };
 
-// Auth Helpers
+// Auth helpers
 export const authService = {
   async signInWithGoogle() {
     try {
