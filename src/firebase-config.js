@@ -1,3 +1,4 @@
+// src/firebase-config.js - ADD uploadFile EXPORT
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
@@ -15,11 +16,18 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// ✅ ONLY ONE DECLARATION FOR EACH
+// ✅ EXPORT ALL FIREBASE SERVICES
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);  // ← ONLY ONE TIME!
+export const storage = getStorage(app);
 export const provider = new GoogleAuthProvider();
+
+// ✅ ADD THIS: uploadFile function
+export async function uploadFile(path, file) {
+  const storageRef = ref(storage, path);
+  const snapshot = await uploadBytes(storageRef, file);
+  return await getDownloadURL(snapshot.ref);
+}
 
 // Firestore helpers
 export const firestore = {
@@ -83,12 +91,6 @@ export const firestore = {
       else if (op.type === 'delete') batch.delete(ref);
     });
     await batch.commit();
-  },
-  
-  async uploadFile(path, file) {
-    const storageRef = ref(storage, path);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
   }
 };
 
