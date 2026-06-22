@@ -1,4 +1,4 @@
-// src/pages/live-scoring.js - CLEAN VERSION
+// src/pages/live-scoring.js
 import { CricketEngine } from '../utils/cricket.js';
 import { UndoManager } from '../utils/undo-manager.js';
 import { generateMatchResult } from '../utils/match-result.js';
@@ -15,7 +15,6 @@ let realtimeSync = null;
 
 function hydrateScoringEngine(engine, savedData) {
   if (!savedData) return engine;
-  
   engine.runs = savedData.runs || 0;
   engine.wickets = savedData.wickets || 0;
   engine.balls = savedData.balls || 0;
@@ -32,7 +31,6 @@ function hydrateScoringEngine(engine, savedData) {
   engine.matchType = savedData.matchType || 't20';
   engine.powerplayData = savedData.powerplayData || { overs: 0, runs: 0, wickets: 0 };
   engine.freeHit = savedData.freeHit || false;
-  
   return engine;
 }
 
@@ -42,7 +40,6 @@ function saveStateBeforeAction() {
 
 export async function LiveScoring(params) {
   currentMatchId = params?.matchId || null;
-  
   if (currentMatchId) {
     const match = await firestore.getOne('matches', currentMatchId);
     if (match) {
@@ -57,7 +54,6 @@ export async function LiveScoring(params) {
         scoringEngine.totalOvers = match.overs;
       }
       currentInnings = match.currentInnings || 1;
-      
       if (!realtimeSync) {
         realtimeSync = new RealtimeSync(currentMatchId);
         realtimeSync.startSync((data) => {
@@ -69,13 +65,11 @@ export async function LiveScoring(params) {
       }
     }
   }
-  
   return renderScoringUI();
 }
 
 function renderScoringUI() {
   const score = scoringEngine.getScore();
-  
   return `
     <div class="live-scoring">
       <div class="flex justify-between items-center mb-16">
@@ -97,8 +91,6 @@ function renderScoringUI() {
           </button>
         </div>
       </div>
-      
-      <!-- Score Display -->
       <div class="card" style="margin-bottom: 20px; background: linear-gradient(145deg, var(--black-card), var(--black)); border: 2px solid var(--gold);">
         <div class="flex justify-between items-center">
           <div>
@@ -126,8 +118,6 @@ function renderScoringUI() {
           </div>
         </div>
       </div>
-      
-      <!-- Extras Display -->
       <div id="extrasDisplay" class="flex flex-wrap gap-8" style="margin-bottom: 16px;">
         ${['wide', 'noBall', 'bye', 'legBye', 'penalty'].map(type => `
           <span style="background: var(--black-card); padding: 4px 12px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(255,215,0,0.1);">
@@ -135,18 +125,14 @@ function renderScoringUI() {
           </span>
         `).join('')}
       </div>
-      
       ${scoringEngine.powerplayOvers > 0 ? `
         <div style="margin-bottom: 16px; font-size: 14px; color: var(--text-secondary);">
           Powerplay: ${Math.floor(scoringEngine.balls / 6)}/${scoringEngine.powerplayOvers} overs • 
           ${score.powerplay.runs} runs • ${score.powerplay.wickets} wickets
         </div>
       ` : ''}
-      
-      <!-- Scoring Buttons -->
       <div style="margin-bottom: 20px;">
         <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Scoring Options</h4>
-        
         <div class="scoring-grid">
           ${[0,1,2,3,4,5,6].map(runs => `
             <button class="scoring-btn" onclick="window.addRuns(${runs})">
@@ -154,7 +140,6 @@ function renderScoringUI() {
             </button>
           `).join('')}
         </div>
-        
         <div style="margin-top: 10px;">
           <h5 style="color: var(--text-muted); font-size: 12px; margin-bottom: 6px;">Wide</h5>
           <div class="scoring-grid" style="grid-template-columns: repeat(4, 1fr);">
@@ -174,7 +159,6 @@ function renderScoringUI() {
             `).join('')}
           </div>
         </div>
-        
         <div style="margin-top: 10px;">
           <h5 style="color: var(--text-muted); font-size: 12px; margin-bottom: 6px;">No Ball</h5>
           <div class="scoring-grid" style="grid-template-columns: repeat(4, 1fr);">
@@ -194,7 +178,6 @@ function renderScoringUI() {
             `).join('')}
           </div>
         </div>
-        
         <div style="margin-top: 10px;">
           <div class="scoring-grid" style="grid-template-columns: repeat(4, 1fr);">
             ${['Bye', 'Leg Bye'].map(type => `
@@ -213,7 +196,6 @@ function renderScoringUI() {
           </div>
         </div>
       </div>
-      
       ${score.fallOfWickets.length > 0 ? `
         <div class="card" style="margin-bottom: 16px;">
           <h4 style="color: var(--text-secondary);">Fall of Wickets</h4>
@@ -226,7 +208,6 @@ function renderScoringUI() {
           </div>
         </div>
       ` : ''}
-      
       <div class="card">
         <h4 style="margin-bottom: 12px; color: var(--text-secondary);">
           <i class="fas fa-comment"></i> Ball-by-Ball
@@ -249,7 +230,6 @@ function renderScoringUI() {
           `).join('')}
         </div>
       </div>
-      
       ${score.isComplete || score.wickets >= 10 ? `
         <div class="card" style="margin-top: 16px; background: rgba(255,215,0,0.05); border: 2px solid var(--gold);">
           <div style="text-align: center; padding: 16px;">
@@ -264,10 +244,6 @@ function renderScoringUI() {
     </div>
   `;
 }
-
-// ============================================
-// WINDOW FUNCTIONS
-// ============================================
 
 window.addRuns = function(runs) {
   saveStateBeforeAction();
@@ -367,7 +343,6 @@ window.undoLastBall = function() {
     alert('No more actions to undo');
     return;
   }
-  
   const restored = undoManager.undo(scoringEngine);
   if (restored) {
     updateScoreDisplay();
@@ -392,14 +367,12 @@ window.saveScore = async function() {
     console.log('Save already in progress...');
     return;
   }
-  
   isSaving = true;
   const saveBtn = document.getElementById('saveBtn');
   if (saveBtn) {
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
   }
-  
   try {
     if (!currentMatchId) {
       const createNew = confirm('No match ID. Create a new match?');
@@ -424,7 +397,6 @@ window.saveScore = async function() {
       }
       return;
     }
-    
     await firestore.update('matches', currentMatchId, {
       scoring: scoringEngine.getScore(),
       ballByBall: scoringEngine.ballByBall,
@@ -432,12 +404,10 @@ window.saveScore = async function() {
       updatedAt: new Date().toISOString(),
       status: scoringEngine.isComplete ? 'completed' : 'live'
     });
-    
     if (scoringEngine.isComplete || scoringEngine.wickets >= 10 || 
         (scoringEngine.target && scoringEngine.runs >= scoringEngine.target)) {
       await handleMatchComplete();
     }
-    
     alert('Score saved successfully! ✅');
   } catch (error) {
     console.error('Save error:', error);
@@ -454,7 +424,6 @@ window.saveScore = async function() {
 async function handleMatchComplete() {
   const match = await firestore.getOne('matches', currentMatchId);
   if (!match) return;
-  
   const result = generateMatchResult({
     team1: { id: match.team1, name: match.team1Name },
     team2: { id: match.team2, name: match.team2Name },
@@ -465,7 +434,6 @@ async function handleMatchComplete() {
     battingStats: scoringEngine.battingStats,
     bowlingStats: scoringEngine.bowlingStats
   });
-  
   await firestore.update('matches', currentMatchId, {
     result: result.result,
     winner: result.winner?.id || null,
@@ -473,7 +441,6 @@ async function handleMatchComplete() {
     motm: result.motm?.name || null,
     status: 'completed'
   });
-  
   if (match.tournamentId && result.winner) {
     await updatePointsTable(match.tournamentId, {
       team1: { id: match.team1, name: match.team1Name },
@@ -490,7 +457,6 @@ async function handleMatchComplete() {
       }
     });
   }
-  
   alert(`Match Complete! ${result.result} 🏆`);
   if (result.motm) {
     alert(`🎖️ Man of the Match: ${result.motm.name}`);
@@ -511,10 +477,8 @@ window.startSecondInnings = async function() {
     alert('No match found!');
     return;
   }
-  
   const match = await firestore.getOne('matches', currentMatchId);
   if (!match) return;
-  
   const firstInningsData = {
     runs: scoringEngine.runs,
     wickets: scoringEngine.wickets,
@@ -528,24 +492,19 @@ window.startSecondInnings = async function() {
     fours: scoringEngine.fours,
     sixes: scoringEngine.sixes
   };
-  
   const innings = match.innings || [];
   innings.push(firstInningsData);
-  
   const target = scoringEngine.runs + 1;
-  
   await firestore.update('matches', currentMatchId, {
     innings: innings,
     currentInnings: 2,
     target: target
   });
-  
   scoringEngine.reset();
   scoringEngine.setTarget(target);
   scoringEngine.totalOvers = match.overs || 20;
   scoringEngine.matchType = match.type || 't20';
   undoManager.clear();
-  
   updateScoreDisplay();
   alert(`2nd Innings started! Target: ${target} 🎯`);
 };
@@ -555,11 +514,9 @@ window.shareLiveScore = function() {
     alert('No active match to share');
     return;
   }
-  
   const link = `${window.location.origin}${window.location.pathname}?match=${currentMatchId}&view=live`;
   const score = scoringEngine.getScore();
   const text = `🏏 Pandavas Cricket Live\nScore: ${score.runs}/${score.wickets}\nOvers: ${score.overs}\nRR: ${score.runRate}`;
-  
   if (navigator.share) {
     navigator.share({
       title: '🏏 Pandavas Cricket Live Score',
@@ -590,7 +547,6 @@ function copyToClipboard(text) {
 function updateScoreDisplay() {
   const container = document.querySelector('.live-scoring');
   if (!container) return;
-  
   const newContent = renderScoringUI();
   container.innerHTML = newContent;
 }
