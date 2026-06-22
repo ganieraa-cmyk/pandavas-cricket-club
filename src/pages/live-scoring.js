@@ -1,4 +1,4 @@
-// src/pages/live-scoring.js - COMPLETE LIVE SCORING PAGE
+// src/pages/live-scoring.js - CLEAN VERSION
 import { CricketEngine } from '../utils/cricket.js';
 import { UndoManager } from '../utils/undo-manager.js';
 import { generateMatchResult } from '../utils/match-result.js';
@@ -32,8 +32,6 @@ function hydrateScoringEngine(engine, savedData) {
   engine.matchType = savedData.matchType || 't20';
   engine.powerplayData = savedData.powerplayData || { overs: 0, runs: 0, wickets: 0 };
   engine.freeHit = savedData.freeHit || false;
-  engine.wideByeRuns = savedData.wideByeRuns || 0;
-  engine.noBallByeRuns = savedData.noBallByeRuns || 0;
   
   return engine;
 }
@@ -60,7 +58,6 @@ export async function LiveScoring(params) {
       }
       currentInnings = match.currentInnings || 1;
       
-      // Setup realtime sync
       if (!realtimeSync) {
         realtimeSync = new RealtimeSync(currentMatchId);
         realtimeSync.startSync((data) => {
@@ -139,7 +136,6 @@ function renderScoringUI() {
         `).join('')}
       </div>
       
-      <!-- Powerplay Info -->
       ${scoringEngine.powerplayOvers > 0 ? `
         <div style="margin-bottom: 16px; font-size: 14px; color: var(--text-secondary);">
           Powerplay: ${Math.floor(scoringEngine.balls / 6)}/${scoringEngine.powerplayOvers} overs • 
@@ -151,7 +147,6 @@ function renderScoringUI() {
       <div style="margin-bottom: 20px;">
         <h4 style="margin-bottom: 12px; color: var(--text-secondary);">Scoring Options</h4>
         
-        <!-- Normal Runs -->
         <div class="scoring-grid">
           ${[0,1,2,3,4,5,6].map(runs => `
             <button class="scoring-btn" onclick="window.addRuns(${runs})">
@@ -160,7 +155,6 @@ function renderScoringUI() {
           `).join('')}
         </div>
         
-        <!-- Wides -->
         <div style="margin-top: 10px;">
           <h5 style="color: var(--text-muted); font-size: 12px; margin-bottom: 6px;">Wide</h5>
           <div class="scoring-grid" style="grid-template-columns: repeat(4, 1fr);">
@@ -172,7 +166,7 @@ function renderScoringUI() {
               { label: 'Wide +4', fn: 'addWide', args: 4 },
               { label: 'Wide +5', fn: 'addWide', args: 5 },
               { label: 'Wide +6', fn: 'addWide', args: 6 },
-              { label: 'Wide Bye', fn: 'addWideBye', args: 1 }
+              { label: 'Wide Bye', fn: 'addWideBye', args: 0 }
             ].map(item => `
               <button class="scoring-btn special" onclick="window.${item.fn}(${item.args})">
                 ${item.label}
@@ -181,7 +175,6 @@ function renderScoringUI() {
           </div>
         </div>
         
-        <!-- No Balls -->
         <div style="margin-top: 10px;">
           <h5 style="color: var(--text-muted); font-size: 12px; margin-bottom: 6px;">No Ball</h5>
           <div class="scoring-grid" style="grid-template-columns: repeat(4, 1fr);">
@@ -193,7 +186,7 @@ function renderScoringUI() {
               { label: 'NB +4', fn: 'addNoBall', args: 4 },
               { label: 'NB +5', fn: 'addNoBall', args: 5 },
               { label: 'NB +6', fn: 'addNoBall', args: 6 },
-              { label: 'NB Bye', fn: 'addNoBallBye', args: 1 }
+              { label: 'NB Bye', fn: 'addNoBallBye', args: 0 }
             ].map(item => `
               <button class="scoring-btn special" onclick="window.${item.fn}(${item.args})">
                 ${item.label}
@@ -202,7 +195,6 @@ function renderScoringUI() {
           </div>
         </div>
         
-        <!-- Byes, Leg Byes, Wickets -->
         <div style="margin-top: 10px;">
           <div class="scoring-grid" style="grid-template-columns: repeat(4, 1fr);">
             ${['Bye', 'Leg Bye'].map(type => `
@@ -222,7 +214,6 @@ function renderScoringUI() {
         </div>
       </div>
       
-      <!-- Fall of Wickets -->
       ${score.fallOfWickets.length > 0 ? `
         <div class="card" style="margin-bottom: 16px;">
           <h4 style="color: var(--text-secondary);">Fall of Wickets</h4>
@@ -236,7 +227,6 @@ function renderScoringUI() {
         </div>
       ` : ''}
       
-      <!-- Ball-by-Ball -->
       <div class="card">
         <h4 style="margin-bottom: 12px; color: var(--text-secondary);">
           <i class="fas fa-comment"></i> Ball-by-Ball
@@ -251,7 +241,6 @@ function renderScoringUI() {
                   ball.type === 'wide-bye' ? `⚠️ Wide Bye (${ball.runs} runs)` :
                   ball.type === 'no-ball' ? `⚠️ No Ball ${ball.runs > 1 ? `(${ball.runs} runs)` : ''}` :
                   ball.type === 'no-ball-bye' ? `⚠️ No Ball Bye (${ball.runs} runs)` :
-                  ball.type.includes('extra') ? `⚠️ ${ball.type.replace('-', ' ')} ${ball.runs > 1 ? `(${ball.runs} runs)` : ''}` : 
                   ball.type === 'penalty' ? `⚖️ Penalty (${ball.runs} runs)` :
                   `${ball.runs} run${ball.runs > 1 ? 's' : ''}`}
                 ${ball.freeHit ? ' (Free Hit)' : ''}
@@ -261,7 +250,6 @@ function renderScoringUI() {
         </div>
       </div>
       
-      <!-- Innings Break -->
       ${score.isComplete || score.wickets >= 10 ? `
         <div class="card" style="margin-top: 16px; background: rgba(255,215,0,0.05); border: 2px solid var(--gold);">
           <div style="text-align: center; padding: 16px;">
@@ -278,10 +266,9 @@ function renderScoringUI() {
 }
 
 // ============================================
-// WINDOW FUNCTIONS - All Scoring Actions
+// WINDOW FUNCTIONS
 // ============================================
 
-// Normal Runs
 window.addRuns = function(runs) {
   saveStateBeforeAction();
   scoringEngine.addRuns(runs);
@@ -289,7 +276,6 @@ window.addRuns = function(runs) {
   autoSave();
 };
 
-// Wide Balls
 window.addWide = function(extraRuns = 0) {
   saveStateBeforeAction();
   scoringEngine.addWide(extraRuns);
@@ -304,7 +290,6 @@ window.addWideBye = function() {
   autoSave();
 };
 
-// No Balls
 window.addNoBall = function(extraRuns = 0) {
   saveStateBeforeAction();
   scoringEngine.addNoBall(extraRuns);
@@ -319,7 +304,6 @@ window.addNoBallBye = function() {
   autoSave();
 };
 
-// Byes
 window.addBye = function() {
   saveStateBeforeAction();
   const runs = parseInt(prompt('Enter bye runs (1-4):') || '1');
@@ -336,7 +320,6 @@ window.addLegBye = function() {
   autoSave();
 };
 
-// Wickets
 window.addWicket = function() {
   const name = prompt('Enter batsman name:');
   if (name !== null) {
@@ -367,7 +350,6 @@ window.addRetiredOut = function() {
   }
 };
 
-// Penalty
 window.addPenalty = function() {
   const runs = parseInt(prompt('Enter penalty runs (5 or 10):') || '5');
   if (runs === 5 || runs === 10) {
@@ -380,7 +362,6 @@ window.addPenalty = function() {
   }
 };
 
-// Undo
 window.undoLastBall = function() {
   if (!undoManager.canUndo()) {
     alert('No more actions to undo');
@@ -397,7 +378,6 @@ window.undoLastBall = function() {
   }
 };
 
-// Reset
 window.resetScore = function() {
   if (confirm('Reset entire scoring?')) {
     scoringEngine.reset();
@@ -407,7 +387,6 @@ window.resetScore = function() {
   }
 };
 
-// Save Score
 window.saveScore = async function() {
   if (isSaving) {
     console.log('Save already in progress...');
@@ -454,7 +433,6 @@ window.saveScore = async function() {
       status: scoringEngine.isComplete ? 'completed' : 'live'
     });
     
-    // Check if match is complete
     if (scoringEngine.isComplete || scoringEngine.wickets >= 10 || 
         (scoringEngine.target && scoringEngine.runs >= scoringEngine.target)) {
       await handleMatchComplete();
@@ -473,7 +451,6 @@ window.saveScore = async function() {
   }
 };
 
-// Handle Match Complete
 async function handleMatchComplete() {
   const match = await firestore.getOne('matches', currentMatchId);
   if (!match) return;
@@ -497,7 +474,6 @@ async function handleMatchComplete() {
     status: 'completed'
   });
   
-  // Update tournament points
   if (match.tournamentId && result.winner) {
     await updatePointsTable(match.tournamentId, {
       team1: { id: match.team1, name: match.team1Name },
@@ -521,7 +497,6 @@ async function handleMatchComplete() {
   }
 }
 
-// Auto Save (Debounced)
 function autoSave() {
   if (currentMatchId) {
     clearTimeout(window._autoSaveTimeout);
@@ -531,7 +506,6 @@ function autoSave() {
   }
 }
 
-// Start Second Innings
 window.startSecondInnings = async function() {
   if (!currentMatchId) {
     alert('No match found!');
@@ -541,7 +515,6 @@ window.startSecondInnings = async function() {
   const match = await firestore.getOne('matches', currentMatchId);
   if (!match) return;
   
-  // Save first innings data
   const firstInningsData = {
     runs: scoringEngine.runs,
     wickets: scoringEngine.wickets,
@@ -567,7 +540,6 @@ window.startSecondInnings = async function() {
     target: target
   });
   
-  // Reset for second innings
   scoringEngine.reset();
   scoringEngine.setTarget(target);
   scoringEngine.totalOvers = match.overs || 20;
@@ -578,7 +550,6 @@ window.startSecondInnings = async function() {
   alert(`2nd Innings started! Target: ${target} 🎯`);
 };
 
-// Share Live Score
 window.shareLiveScore = function() {
   if (!currentMatchId) {
     alert('No active match to share');
@@ -616,7 +587,6 @@ function copyToClipboard(text) {
   });
 }
 
-// Update Score Display
 function updateScoreDisplay() {
   const container = document.querySelector('.live-scoring');
   if (!container) return;
@@ -625,8 +595,6 @@ function updateScoreDisplay() {
   container.innerHTML = newContent;
 }
 
-// Set up over completion callback
 scoringEngine.onOverComplete((data) => {
   console.log(`Over ${data.over} completed: ${data.runs}/${data.wickets}`);
-  // Could add auto-save or notification here
 });
