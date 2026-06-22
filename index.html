@@ -1,46 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pandavas Cricket Club</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="🏏 Ultimate cricket scoring app for Pandavas Cricket Club">
+  
+  <title>Pandavas CC Scorer</title>
+  
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="icon" href="/icons/favicon.ico" type="image/x-icon">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/src/styles/main.css">
+  
+  <!-- QR Code Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-  <div class="header">
-    <h1>PANDAVAS CRICKET CLUB</h1>
-    <p>5 Warriors. 1 Dream.</p>
+  <div id="app">
+    <header id="main-header"></header>
+    <nav id="sidebar"></nav>
+    <main id="main-content">
+      <div id="page-container"></div>
+    </main>
+    <div id="modal-container"></div>
   </div>
-
-  <div class="menu">
-   <button onclick="window.location.href='players.html'">
-  Players
-</button>
-   <button onclick="window.location.href='players.html'">
-  Players
-</button>
-
-<button onclick="window.location.href='match.html'">
-  New Match
-</button>
-
-<button>
-  Statistics
-</button>
-  </div>
-
- <script type="module" src="js/app.js">
-   import { db, auth } from "./firebase.js";
-
-console.log("Pandavas Cricket Club Loaded");
-console.log("DB =", db);
-console.log("AUTH =", auth);
-
-document.body.insertAdjacentHTML(
-  "beforeend",
-  "<p style='color:white'>Firebase Connected ✅</p>"
-);
- </script>
-
+  <script type="module" src="/src/app.js"></script>
 </body>
 </html>
