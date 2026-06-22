@@ -1,31 +1,10 @@
-// src/firebase-config.js - CDN Version
+// src/firebase-config.js - WITH YOUR FIREBASE CONFIG
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
-// src/firebase-config.js - Add storage functions
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
-export const storage = getStorage(app);
-
-export const uploadFile = async (path, file) => {
-  const storageRef = ref(storage, path);
-  const snapshot = await uploadBytes(storageRef, file);
-  return await getDownloadURL(snapshot.ref);
-};
-
-// Also add to firestore export
-export const firestore = {
-  // ... existing methods
-  
-  // Upload file to storage
-  async uploadFile(path, file) {
-    const storageRef = ref(storage, path);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
-  }
-};
-// 🔥 REPLACE WITH YOUR FIREBASE CONFIG
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// ✅ YOUR FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyBbyUmKvhpFf0ZYBlfdH7X1EWDfOH3PDgk",
   authDomain: "pandavas-cc-scorer.firebaseapp.com",
@@ -36,13 +15,23 @@ const firebaseConfig = {
   measurementId: "G-EE3XDFJBYY"
 };
 
-
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// ✅ Export Firebase services (EACH ONCE)
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const provider = new GoogleAuthProvider();
 
+// ✅ Upload helper function
+export async function uploadFile(path, file) {
+  const storageRef = ref(storage, path);
+  const snapshot = await uploadBytes(storageRef, file);
+  return await getDownloadURL(snapshot.ref);
+}
+
+// Firestore Helpers
 export const firestore = {
   async create(collectionName, data) {
     const docRef = doc(collection(db, collectionName));
@@ -104,9 +93,16 @@ export const firestore = {
       else if (op.type === 'delete') batch.delete(ref);
     });
     await batch.commit();
+  },
+  
+  async uploadFile(path, file) {
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
   }
 };
 
+// Auth Helpers
 export const authService = {
   async signInWithGoogle() {
     try {
